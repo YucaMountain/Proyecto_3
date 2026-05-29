@@ -6,23 +6,15 @@ module m7_calculadora (
     input  logic        key_valid,
     input  logic [15:0] current_display,
 
-    // Señales que vienen de la unidad de división
-    input  logic        div_done,
-    input  logic [5:0]  div_quotient,
-    input  logic [3:0]  div_remainder,
-
-    // Señales hacia la unidad de división
-    output logic        div_valid,
-    output logic [5:0]  dividend_A,
-    output logic [3:0]  divisor_B,
-
     // Señales hacia m4_display_controller
     output logic        m4_clear,
     output logic        m4_load,
     output logic [15:0] m4_result_data
 );
 
+    // ------------------------------------------------------------
     // Códigos del teclado
+    // ------------------------------------------------------------
     localparam KEY_A     = 4'hA;
     localparam KEY_B     = 4'hB;
     localparam KEY_C     = 4'hC;
@@ -30,7 +22,9 @@ module m7_calculadora (
     localparam KEY_STAR  = 4'hE; // *
     localparam KEY_HASH  = 4'hF; // #
 
-    // Estados
+    // ------------------------------------------------------------
+    // Estados de la FSM
+    // ------------------------------------------------------------
     localparam ST_IDLE        = 3'd0;
     localparam ST_START_DIV   = 3'd1;
     localparam ST_WAIT_DONE   = 3'd2;
@@ -41,14 +35,44 @@ module m7_calculadora (
 
     logic [2:0] state;
 
+    // ------------------------------------------------------------
     // Registros internos para almacenar dividendo y divisor
+    // ------------------------------------------------------------
     logic [5:0] reg_A;
     logic [3:0] reg_B;
 
     // 0 = mostrar cociente, 1 = mostrar residuo
     logic show_remainder;
 
+    // ------------------------------------------------------------
+    // Señales internas para conectar con m8_divisor
+    // ------------------------------------------------------------
+    logic        div_valid;
+    logic        div_done;
+    logic [5:0]  dividend_A;
+    logic [3:0]  divisor_B;
+    logic [5:0]  div_quotient;
+    logic [3:0]  div_remainder;
+
+    // ------------------------------------------------------------
+    // Instancia de la unidad divisora
+    // ------------------------------------------------------------
+    m8_divisor u_m8_divisor (
+        .clk       (clk),
+        .rst_n     (rst_n),
+
+        .valid     (div_valid),
+        .dividend  (dividend_A),
+        .divisor   (divisor_B),
+
+        .done      (div_done),
+        .quotient  (div_quotient),
+        .remainder (div_remainder)
+    );
+
+    // ------------------------------------------------------------
     // Valor numérico leído desde la pantalla
+    // ------------------------------------------------------------
     logic [10:0] val_en_pantalla;
 
     // Resultado seleccionado para mostrar
@@ -61,13 +85,18 @@ module m7_calculadora (
     logic [3:0] b1;
     logic [3:0] b0;
 
+    // ------------------------------------------------------------
     // Conversión de la pantalla actual a número binario.
     // Se conserva el orden usado en el Proyecto II.
+    // ------------------------------------------------------------
     assign val_en_pantalla =
         ((current_display[7:4]   < 10) ? {7'd0, current_display[7:4]}   : 11'd0) * 11'd100 +
         ((current_display[11:8]  < 10) ? {7'd0, current_display[11:8]}  : 11'd0) * 11'd10  +
         ((current_display[15:12] < 10) ? {7'd0, current_display[15:12]} : 11'd0);
 
+    // ------------------------------------------------------------
+    // FSM principal de control
+    // ------------------------------------------------------------
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             reg_A          <= 6'd0;
@@ -167,7 +196,7 @@ module m7_calculadora (
                     // División entre cero
                     if (reg_B == 4'd0) begin
                         // CEEE puede interpretarse como "EEE" con primer dígito apagado.
-                        // Depende de que el driver de 7 segmentos tenga definido E.
+                        // Depende de que m6 tenga definido el patrón para E.
                         m4_result_data <= 16'hCEEE;
                         m4_load        <= 1'b1;
                         state          <= ST_IDLE;
@@ -203,8 +232,6 @@ module m7_calculadora (
 
                 // ----------------------------------------------------
                 // Conversión simple a BCD: centenas
-                // Para este proyecto el resultado máximo es pequeño,
-                // pero se deja soporte hasta 3 dígitos.
                 // ----------------------------------------------------
                 ST_BCD_HUND: begin
                     b3 <= 4'hC;
@@ -238,7 +265,7 @@ module m7_calculadora (
                 end
 
                 // ----------------------------------------------------
-                // Cargar resultado al display controller
+                // Cargar resultado al m4_display_controller
                 // ----------------------------------------------------
                 ST_LOAD_RESULT: begin
                     m4_result_data <= {b0, b1, b2, b3};
