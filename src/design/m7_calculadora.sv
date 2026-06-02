@@ -15,12 +15,12 @@ module m7_calculadora (
     // ------------------------------------------------------------
     // Códigos del teclado
     // ------------------------------------------------------------
-    localparam KEY_A     = 4'hA;
-    localparam KEY_B     = 4'hB;
-    localparam KEY_C     = 4'hC;
-    localparam KEY_D     = 4'hD;
-    localparam KEY_STAR  = 4'hE; // *
-    localparam KEY_HASH  = 4'hF; // #
+    localparam KEY_A    = 4'hA;
+    localparam KEY_B    = 4'hB;
+    localparam KEY_C    = 4'hC;
+    localparam KEY_D    = 4'hD;
+    localparam KEY_STAR = 4'hE; // *
+    localparam KEY_HASH = 4'hF; // #
 
     // ------------------------------------------------------------
     // Estados de la FSM
@@ -142,7 +142,6 @@ module m7_calculadora (
                                 reg_A      <= val_en_pantalla[5:0];
                                 dividend_A <= val_en_pantalla[5:0];
                             end
-
                             m4_clear <= 1'b1;
                         end
 
@@ -152,7 +151,6 @@ module m7_calculadora (
                                 reg_B     <= val_en_pantalla[3:0];
                                 divisor_B <= val_en_pantalla[3:0];
                             end
-
                             m4_clear <= 1'b1;
                         end
 
@@ -163,8 +161,7 @@ module m7_calculadora (
                             dividend_A     <= 6'd0;
                             divisor_B      <= 4'd0;
                             show_remainder <= 1'b0;
-
-                            m4_clear <= 1'b1;
+                            m4_clear       <= 1'b1;
                         end
 
                         // D: ejecutar división
@@ -195,8 +192,6 @@ module m7_calculadora (
 
                     // División entre cero
                     if (reg_B == 4'd0) begin
-                        // CEEE puede interpretarse como "EEE" con primer dígito apagado.
-                        // Depende de que m6 tenga definido el patrón para E.
                         m4_result_data <= 16'hCEEE;
                         m4_load        <= 1'b1;
                         state          <= ST_IDLE;
@@ -221,46 +216,46 @@ module m7_calculadora (
                 // ----------------------------------------------------
                 ST_SELECT_RES: begin
                     if (show_remainder) begin
-                        result_to_show <= {4'd0, div_remainder};
+                        temp_val <= {4'd0, div_remainder};
                     end
                     else begin
-                        result_to_show <= {2'd0, div_quotient};
+                        temp_val <= {2'd0, div_quotient};
                     end
-
                     state <= ST_BCD_HUND;
                 end
 
                 // ----------------------------------------------------
-                // Conversión simple a BCD: centenas
+                // Conversión a BCD Segura para Hardware (Restas Sucesivas)
                 // ----------------------------------------------------
                 ST_BCD_HUND: begin
-                    b3 <= 4'hC;
-
-                    if (result_to_show >= 8'd100) begin
-                        b2       <= result_to_show / 8'd100;
-                        temp_val <= result_to_show % 8'd100;
-                    end
-                    else begin
-                        b2       <= 4'hC;
-                        temp_val <= result_to_show;
-                    end
-
+                    b3 <= 4'hC; // Apagamos el dígito de los millares
+                    
+                    if      (temp_val > 8'd199) begin b2 <= 4'd2; temp_val <= temp_val - 8'd200; end
+                    else if (temp_val > 8'd99)  begin b2 <= 4'd1; temp_val <= temp_val - 8'd100; end
+                    else                        begin b2 <= 4'hC; end // Apagamos centenas si es 0
+                    
                     state <= ST_BCD_TENS;
                 end
 
                 // ----------------------------------------------------
-                // Conversión simple a BCD: decenas y unidades
+                // Conversión a BCD: Decenas y Unidades
                 // ----------------------------------------------------
                 ST_BCD_TENS: begin
-                    if (temp_val >= 8'd10) begin
-                        b1 <= temp_val / 8'd10;
-                        b0 <= temp_val % 8'd10;
+                    if      (temp_val > 8'd89) begin b1 <= 4'd9; b0 <= temp_val - 8'd90; end
+                    else if (temp_val > 8'd79) begin b1 <= 4'd8; b0 <= temp_val - 8'd80; end
+                    else if (temp_val > 8'd69) begin b1 <= 4'd7; b0 <= temp_val - 8'd70; end
+                    else if (temp_val > 8'd59) begin b1 <= 4'd6; b0 <= temp_val - 8'd60; end
+                    else if (temp_val > 8'd49) begin b1 <= 4'd5; b0 <= temp_val - 8'd50; end
+                    else if (temp_val > 8'd39) begin b1 <= 4'd4; b0 <= temp_val - 8'd40; end
+                    else if (temp_val > 8'd29) begin b1 <= 4'd3; b0 <= temp_val - 8'd30; end
+                    else if (temp_val > 8'd19) begin b1 <= 4'd2; b0 <= temp_val - 8'd20; end
+                    else if (temp_val > 8'd9)  begin b1 <= 4'd1; b0 <= temp_val - 8'd10; end
+                    else                       begin 
+                        // Supresión de ceros a la izquierda
+                        b1 <= (b2 == 4'hC) ? 4'hC : 4'd0; 
+                        b0 <= temp_val[3:0]; 
                     end
-                    else begin
-                        b1 <= 4'hC;
-                        b0 <= temp_val[3:0];
-                    end
-
+                    
                     state <= ST_LOAD_RESULT;
                 end
 

@@ -61,7 +61,7 @@ module m3_keypad_reader (
 
     // El escaneo avanza solamente cuando no hay ninguna tecla presionada.
     // Se usa rows_db para trabajar con las señales ya filtradas.
-    assign scan_enable = (rows_db == 4'b1111);
+    assign scan_enable = (rows == 4'b1111);
 
     // Contador de escaneo de columnas
     always_ff @(posedge clk or negedge rst_n) begin

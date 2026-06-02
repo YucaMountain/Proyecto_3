@@ -48,11 +48,11 @@ module m6_seven_segment_driver (
             4'h9: seg = 7'b1101111; 
             4'hA: seg = 7'b1110111; 
             4'hB: seg = 7'b1111100; 
-            4'hC: seg = 7'b1000000;  //Aqui se cambió el display para en vez de mostrar una "C" muestre un guion "-" ya que nuestro C funciona como un full clear
+            4'hC: seg = 7'b1000000; // Guion "-"
             4'hD: seg = 7'b1011110; 
             4'hE: seg = 7'b1111001; 
             4'hF: seg = 7'b1110001; 
-            default: seg = 7'b1000000; // Todos los segmentos apagados
+            default: seg = 7'b0000000; // AHORA SÍ: Todos apagados
         endcase
     end
 
