@@ -19,10 +19,10 @@ module m6_seven_segment_driver (
     logic [3:0] current_hex_digit;
     always_comb begin
         case (mux_counter)
-            2'b00: current_hex_digit = hex_data[3:0];   // Dígito 0 (Derecha)
-            2'b01: current_hex_digit = hex_data[7:4];   // Dígito 1
-            2'b10: current_hex_digit = hex_data[11:8];  // Dígito 2
-            2'b11: current_hex_digit = hex_data[15:12]; // Dígito 3 (Izquierda)
+            2'b00: current_hex_digit = hex_data[15:12]; // Dígito 0 (Ahora es la Izquierda física)
+            2'b01: current_hex_digit = hex_data[11:8];  // Dígito 1
+            2'b10: current_hex_digit = hex_data[7:4];   // Dígito 2
+            2'b11: current_hex_digit = hex_data[3:0];   // Dígito 3 (Ahora es la Derecha física)
         endcase
     end
 
