@@ -27,22 +27,34 @@ module m8_divisor (
     logic [5:0] quotient_next;
     logic       can_subtract;
 
-    always @(*) begin
+    // LA MAGIA: Un cable de 6 bits para atrapar el "Signo Negativo"
+    logic [5:0] sub_result;
+
+    // Lógica del Algoritmo de División (Combinacional)
+    always_comb begin
         rem_shift = {remainder_reg[3:0], dividend_reg[bit_index]};
 
-        if (rem_shift >= {1'b0, divisor_reg}) begin
+        // Restamos agregando ceros a la izquierda para evitar desbordamientos
+        // Si rem_shift es menor que divisor_reg, el resultado será negativo.
+        sub_result = {1'b0, rem_shift} - {2'b00, divisor_reg};
+
+        // En binario, el bit 5 (el de más a la izquierda) nos dice el signo:
+        // Si el bit 5 es '0' -> Resultado es Positivo o Cero (Sí cabía el divisor)
+        // Si el bit 5 es '1' -> Resultado es Negativo (No cabía el divisor)
+        if (sub_result[5] == 1'b0) begin
             can_subtract = 1'b1;
-            rem_next     = rem_shift - {1'b0, divisor_reg};
+            rem_next     = sub_result[4:0]; // Aceptamos la resta
         end 
         else begin
             can_subtract = 1'b0;
-            rem_next     = rem_shift;
+            rem_next     = rem_shift;       // Descartamos la resta, nos quedamos igual
         end
 
         quotient_next = quotient_reg;
         quotient_next[bit_index] = can_subtract;
     end
 
+    // Máquina de Estados (Secuencial)
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             state         <= ST_IDLE;
@@ -59,7 +71,6 @@ module m8_divisor (
             done <= 1'b0;
 
             case (state)
-
                 ST_IDLE: begin
                     if (valid) begin
                         if (divisor == 4'd0) begin
@@ -97,7 +108,6 @@ module m8_divisor (
                 default: begin
                     state <= ST_IDLE;
                 end
-
             endcase
         end
     end
