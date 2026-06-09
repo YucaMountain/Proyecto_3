@@ -339,6 +339,73 @@ module top_module_tb;
         key_D();
         wait_display(16'hCEEE, "D ejecuta 10/0 y muestra error CEEE");
 
+        // ========================================================
+        // Prueba 5: 50 / 5 = Q10 R0
+        // ========================================================
+
+        $display("\n--- Prueba 5: 50 / 5 ---");
+
+        key_C();
+        wait_display(16'hCCCC, "C limpia todo");
+
+        key_5();
+        wait_display(16'hCCC5, "Ingresar 5");
+
+        key_0();
+        wait_display(16'hCC50, "Ingresar 50");
+
+        key_A();
+        wait_display(16'hCCCC, "Guardar A=50");
+
+        key_5();
+        wait_display(16'hCCC5, "Ingresar 5");
+
+        key_B();
+        wait_display(16'hCCCC, "Guardar B=5");
+
+        key_D();
+        wait_display(16'hCC10, "D ejecuta 50/5 y muestra cociente 10");
+
+        key_HASH();
+        wait_display(16'hCCC0, "# muestra residuo 0");
+
+        key_STAR();
+        wait_display(16'hCC10, "* vuelve a mostrar cociente 10");
+
+
+        // ========================================================
+        // Prueba 6: 48 / 8 = Q6 R0
+        // ========================================================
+
+        $display("\n--- Prueba 6: 48 / 8 ---");
+
+        key_C();
+        wait_display(16'hCCCC, "C limpia todo");
+
+        key_4();
+        wait_display(16'hCCC4, "Ingresar 4");
+
+        key_8();
+        wait_display(16'hCC48, "Ingresar 48");
+
+        key_A();
+        wait_display(16'hCCCC, "Guardar A=48");
+
+        key_8();
+        wait_display(16'hCCC8, "Ingresar 8");
+
+        key_B();
+        wait_display(16'hCCCC, "Guardar B=8");
+
+        key_D();
+        wait_display(16'hCCC6, "D ejecuta 48/8 y muestra cociente 6");
+
+        key_HASH();
+        wait_display(16'hCCC0, "# muestra residuo 0");
+
+        key_STAR();
+        wait_display(16'hCCC6, "* vuelve a mostrar cociente 6");
+
         $display("==========================================");
         $display(" Fin de top_module_tb");
         $display("==========================================");
