@@ -26,15 +26,13 @@ module m7_calculadora (
     localparam KEY_STAR = 4'hE; // *
     localparam KEY_HASH = 4'hF; // #
 
-    localparam ST_IDLE           = 4'd0;
-    localparam ST_START_DIV      = 4'd1;
-    localparam ST_SEND_VALID     = 4'd2;
-    localparam ST_WAIT_DONE      = 4'd3;
-    localparam ST_CAPTURE_RESULT = 4'd4;
-    localparam ST_BCD_CONV       = 4'd5;
-    localparam ST_LOAD_RES       = 4'd6;
+    localparam ST_IDLE           = 3'd0;
+    localparam ST_START_DIV      = 3'd1;
+    localparam ST_SEND_VALID     = 3'd2;
+    localparam ST_WAIT_DONE      = 3'd3;
+    localparam ST_CAPTURE_RESULT = 3'd4;
 
-    logic [3:0] state;
+    logic [2:0] state;
 
     logic [5:0] reg_A;
     logic [3:0] reg_B;
@@ -42,18 +40,13 @@ module m7_calculadora (
     logic [5:0] last_quotient;
     logic [3:0] last_remainder;
 
-    logic [5:0] temp_val;
-    logic [3:0] b1;
-    logic [3:0] b0;
-
-    // ------------------------------------------------------------
-    // Lectura de current_display en formato normal:
+    // ============================================================
+    // Lectura de current_display en formato normal
     //
     // CCC5 = 5
     // CC15 = 15
-    // CC50 = 50
-    // CC48 = 48
-    // ------------------------------------------------------------
+    // CC58 = 58
+    // ============================================================
 
     logic [13:0] d3;
     logic [13:0] d2;
@@ -71,6 +64,56 @@ module m7_calculadora (
                               (d1 * 14'd10)   +
                                d0;
 
+    // ============================================================
+    // Función para convertir binario 0-63 a formato display
+    //
+    // 3  -> CCC3
+    // 5  -> CCC5
+    // 10 -> CC10
+    // 11 -> CC11
+    // ============================================================
+
+    function automatic logic [15:0] bin_to_display(input logic [5:0] value);
+        logic [3:0] tens;
+        logic [3:0] ones;
+        begin
+            if      (value >= 6'd60) begin
+                tens = 4'd6;
+                ones = value - 6'd60;
+            end
+            else if (value >= 6'd50) begin
+                tens = 4'd5;
+                ones = value - 6'd50;
+            end
+            else if (value >= 6'd40) begin
+                tens = 4'd4;
+                ones = value - 6'd40;
+            end
+            else if (value >= 6'd30) begin
+                tens = 4'd3;
+                ones = value - 6'd30;
+            end
+            else if (value >= 6'd20) begin
+                tens = 4'd2;
+                ones = value - 6'd20;
+            end
+            else if (value >= 6'd10) begin
+                tens = 4'd1;
+                ones = value - 6'd10;
+            end
+            else begin
+                tens = 4'hC;
+                ones = value[3:0];
+            end
+
+            bin_to_display = {4'hC, 4'hC, tens, ones};
+        end
+    endfunction
+
+    // ============================================================
+    // FSM principal
+    // ============================================================
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             reg_A          <= 6'd0;
@@ -78,10 +121,6 @@ module m7_calculadora (
 
             last_quotient  <= 6'd0;
             last_remainder <= 4'd0;
-
-            temp_val       <= 6'd0;
-            b1             <= 4'hC;
-            b0             <= 4'h0;
 
             m4_clear       <= 1'b0;
             m4_load        <= 1'b0;
@@ -92,7 +131,7 @@ module m7_calculadora (
             divisor_out    <= 4'd0;
 
             state          <= ST_IDLE;
-        end 
+        end
         else begin
             m4_clear  <= 1'b0;
             m4_load   <= 1'b0;
@@ -100,10 +139,15 @@ module m7_calculadora (
 
             case (state)
 
+                // ====================================================
+                // Espera de teclas
+                // ====================================================
                 ST_IDLE: begin
                     if (key_valid) begin
 
-                        // Guardar dividendo
+                        // --------------------------------------------
+                        // A: guardar dividendo
+                        // --------------------------------------------
                         if (key_code == KEY_A) begin
                             if (val_en_pantalla <= 14'd63) begin
                                 reg_A    <= val_en_pantalla[5:0];
@@ -115,7 +159,9 @@ module m7_calculadora (
                             end
                         end
 
-                        // Guardar divisor
+                        // --------------------------------------------
+                        // B: guardar divisor
+                        // --------------------------------------------
                         else if (key_code == KEY_B) begin
                             if (val_en_pantalla <= 14'd15) begin
                                 reg_B    <= val_en_pantalla[3:0];
@@ -127,36 +173,47 @@ module m7_calculadora (
                             end
                         end
 
-                        // Limpiar todo
+                        // --------------------------------------------
+                        // C: limpiar todo
+                        // --------------------------------------------
                         else if (key_code == KEY_C) begin
                             reg_A          <= 6'd0;
                             reg_B          <= 4'd0;
                             last_quotient  <= 6'd0;
                             last_remainder <= 4'd0;
-                            temp_val       <= 6'd0;
+
                             m4_clear       <= 1'b1;
                         end
 
-                        // Ejecutar división
+                        // --------------------------------------------
+                        // D: ejecutar división
+                        // Después de calcular muestra cociente
+                        // --------------------------------------------
                         else if (key_code == KEY_D) begin
                             state <= ST_START_DIV;
                         end
 
-                        // Mostrar cociente
+                        // --------------------------------------------
+                        // *: mostrar residuo
+                        // --------------------------------------------
                         else if (key_code == KEY_STAR) begin
-                            temp_val <= last_quotient;
-                            state    <= ST_BCD_CONV;
+                            m4_result_data <= bin_to_display({2'd0, last_remainder});
+                            m4_load        <= 1'b1;
                         end
 
-                        // Mostrar residuo
+                        // --------------------------------------------
+                        // #: mostrar cociente
+                        // --------------------------------------------
                         else if (key_code == KEY_HASH) begin
-                            temp_val <= {2'd0, last_remainder};
-                            state    <= ST_BCD_CONV;
+                            m4_result_data <= bin_to_display(last_quotient);
+                            m4_load        <= 1'b1;
                         end
                     end
                 end
 
-                // Colocar operandos estables
+                // ====================================================
+                // Colocar operandos para m8
+                // ====================================================
                 ST_START_DIV: begin
                     if (reg_B == 4'd0) begin
                         m4_result_data <= 16'hCEEE;
@@ -170,44 +227,34 @@ module m7_calculadora (
                     end
                 end
 
-                // Mandar valid un ciclo después
+                // ====================================================
+                // Enviar valid un ciclo después
+                // ====================================================
                 ST_SEND_VALID: begin
                     div_valid <= 1'b1;
                     state     <= ST_WAIT_DONE;
                 end
 
-                // Esperar done del divisor
+                // ====================================================
+                // Esperar done de m8
+                // ====================================================
                 ST_WAIT_DONE: begin
                     if (div_done) begin
                         state <= ST_CAPTURE_RESULT;
                     end
                 end
 
-                // Capturar resultado un ciclo después de done
+                // ====================================================
+                // Capturar resultado y mostrar cociente
+                // ====================================================
                 ST_CAPTURE_RESULT: begin
                     last_quotient  <= quotient_in;
                     last_remainder <= remainder_in;
-                    temp_val       <= quotient_in;
-                    state          <= ST_BCD_CONV;
-                end
 
-                // Conversión binario a decimal para 0 a 63
-                ST_BCD_CONV: begin
-                    if      (temp_val >= 6'd60) begin b1 <= 4'd6; b0 <= temp_val - 6'd60; end
-                    else if (temp_val >= 6'd50) begin b1 <= 4'd5; b0 <= temp_val - 6'd50; end
-                    else if (temp_val >= 6'd40) begin b1 <= 4'd4; b0 <= temp_val - 6'd40; end
-                    else if (temp_val >= 6'd30) begin b1 <= 4'd3; b0 <= temp_val - 6'd30; end
-                    else if (temp_val >= 6'd20) begin b1 <= 4'd2; b0 <= temp_val - 6'd20; end
-                    else if (temp_val >= 6'd10) begin b1 <= 4'd1; b0 <= temp_val - 6'd10; end
-                    else                         begin b1 <= 4'hC; b0 <= temp_val[3:0]; end
-
-                    state <= ST_LOAD_RES;
-                end
-
-                // Cargar resultado hacia m4
-                ST_LOAD_RES: begin
-                    m4_result_data <= {4'hC, 4'hC, b1, b0};
+                    // Después de presionar D, muestra cociente
+                    m4_result_data <= bin_to_display(quotient_in);
                     m4_load        <= 1'b1;
+
                     state          <= ST_IDLE;
                 end
 

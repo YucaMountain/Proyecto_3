@@ -18,72 +18,88 @@ module m8_divisor (
 
     logic [5:0] dividend_reg;
     logic [3:0] divisor_reg;
+
     logic [5:0] quotient_reg;
-    logic [4:0] remainder_reg;
+    logic [5:0] remainder_reg;
+
     logic [2:0] bit_index;
 
-    logic [4:0] rem_shift;
-    logic [4:0] rem_next;
+    logic [5:0] rem_shift;
+    logic [5:0] rem_next;
     logic [5:0] quotient_next;
     logic       can_subtract;
 
-    // LA MAGIA: Un cable de 6 bits para atrapar el "Signo Negativo"
-    logic [5:0] sub_result;
+    // ============================================================
+    // Lógica combinacional de división shift-and-subtract
+    // ============================================================
 
-    // Lógica del Algoritmo de División (Combinacional)
-    always_comb begin
-        rem_shift = {remainder_reg[3:0], dividend_reg[bit_index]};
+    always @(*) begin
+        // Valor por defecto
+        rem_shift     = 6'd0;
+        rem_next      = 6'd0;
+        quotient_next = quotient_reg;
+        can_subtract  = 1'b0;
 
-        // Restamos agregando ceros a la izquierda para evitar desbordamientos
-        // Si rem_shift es menor que divisor_reg, el resultado será negativo.
-        sub_result = {1'b0, rem_shift} - {2'b00, divisor_reg};
+        // Baja el bit actual del dividendo hacia el residuo parcial
+        rem_shift = {remainder_reg[4:0], dividend_reg[bit_index]};
 
-        // En binario, el bit 5 (el de más a la izquierda) nos dice el signo:
-        // Si el bit 5 es '0' -> Resultado es Positivo o Cero (Sí cabía el divisor)
-        // Si el bit 5 es '1' -> Resultado es Negativo (No cabía el divisor)
-        if (sub_result[5] == 1'b0) begin
+        // Comparación directa y segura
+        if (rem_shift >= {2'b00, divisor_reg}) begin
             can_subtract = 1'b1;
-            rem_next     = sub_result[4:0]; // Aceptamos la resta
-        end 
+            rem_next     = rem_shift - {2'b00, divisor_reg};
+        end
         else begin
             can_subtract = 1'b0;
-            rem_next     = rem_shift;       // Descartamos la resta, nos quedamos igual
+            rem_next     = rem_shift;
         end
 
         quotient_next = quotient_reg;
         quotient_next[bit_index] = can_subtract;
     end
 
-    // Máquina de Estados (Secuencial)
+    // ============================================================
+    // FSM principal
+    // ============================================================
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             state         <= ST_IDLE;
+
             dividend_reg  <= 6'd0;
             divisor_reg   <= 4'd0;
+
             quotient_reg  <= 6'd0;
-            remainder_reg <= 5'd0;
+            remainder_reg <= 6'd0;
+
             quotient      <= 6'd0;
             remainder     <= 4'd0;
+
             bit_index     <= 3'd0;
             done          <= 1'b0;
-        end 
+        end
         else begin
             done <= 1'b0;
 
             case (state)
+
                 ST_IDLE: begin
                     if (valid) begin
+
+                        // Protección división entre cero
                         if (divisor == 4'd0) begin
                             quotient  <= 6'd0;
                             remainder <= 4'd0;
                             done      <= 1'b1;
                             state     <= ST_IDLE;
-                        end 
+                        end
+
                         else begin
                             dividend_reg  <= dividend;
                             divisor_reg   <= divisor;
+
                             quotient_reg  <= 6'd0;
-                            remainder_reg <= 5'd0;
+                            remainder_reg <= 6'd0;
+
                             bit_index     <= 3'd5;
                             state         <= ST_RUN;
                         end
@@ -96,10 +112,14 @@ module m8_divisor (
 
                     if (bit_index == 3'd0) begin
                         quotient  <= quotient_next;
+
+                        // El residuo máximo es menor que el divisor.
+                        // Como divisor es de 4 bits, el residuo cabe en 4 bits.
                         remainder <= rem_next[3:0];
+
                         done      <= 1'b1;
                         state     <= ST_IDLE;
-                    end 
+                    end
                     else begin
                         bit_index <= bit_index - 1'b1;
                     end
@@ -108,6 +128,7 @@ module m8_divisor (
                 default: begin
                     state <= ST_IDLE;
                 end
+
             endcase
         end
     end
