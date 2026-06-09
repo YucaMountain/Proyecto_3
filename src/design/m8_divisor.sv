@@ -112,7 +112,6 @@ module m8_divisor (
 
                     if (bit_index == 3'd0) begin
                         quotient  <= quotient_next;
-
                         // El residuo máximo es menor que el divisor.
                         // Como divisor es de 4 bits, el residuo cabe en 4 bits.
                         remainder <= rem_next[3:0];
