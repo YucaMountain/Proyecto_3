@@ -1,4 +1,4 @@
-#Proyecto Corto III: División Entera Sin Signo en FPGA
+# Proyecto Corto III: División Entera Sin Signo en FPGA
 
 Integrantes
 
@@ -11,7 +11,7 @@ Plataforma: Tang Nano 9K
 
 ⸻
 
-##1. Introducción
+## 1. Introducción
 
 En este proyecto se desarrolló un sistema digital sincrónico en HDL orientado a la implementación de una unidad de división entera sin signo sobre una FPGA Tang Nano 9K. El sistema permite ingresar un dividendo y un divisor mediante un teclado matricial, almacenar ambos operandos, ejecutar la operación de división y desplegar en cuatro displays de 7 segmentos tanto el cociente como el residuo.
 
@@ -21,7 +21,7 @@ A diferencia de una implementación directa mediante operadores aritméticos de 
 
 ⸻
 
-##2. Definición general del problema, objetivos y especificaciones
+## 2. Definición general del problema, objetivos y especificaciones
 
 El problema planteado consiste en diseñar un circuito digital sincrónico capaz de realizar una división entera sin signo. El sistema debe permitir ingresar un dividendo y un divisor desde un teclado, procesar la operación dentro de la FPGA y mostrar el resultado mediante displays de 7 segmentos.
 
@@ -48,7 +48,7 @@ Como objetivos específicos se plantearon:
 
 ⸻
 
-##3. Descripción general del funcionamiento del circuito completo
+## 3. Descripción general del funcionamiento del circuito completo
 
 El sistema completo se divide en varios subsistemas interconectados. El flujo general inicia con el reloj principal de 27 MHz, el cual es reducido mediante un divisor de reloj para generar una base de tiempo adecuada para la lectura del teclado y el refrescamiento de los displays.
 
@@ -62,7 +62,7 @@ Finalmente, el módulo de display convierte el valor interno a una representaci�
 
 ⸻
 
-##4. Interfaz de usuario
+## 4. Interfaz de usuario
 
 La asignación final de teclas fue la siguiente:
 
@@ -95,9 +95,9 @@ D   -> muestra cociente
 
 ⸻
 
-##5. Descripción general de cada subsistema
+## 5. Descripción general de cada subsistema
 
-###5.1 Subsistema de división de reloj: m1_clk_divider
+### 5.1 Subsistema de división de reloj: m1_clk_divider
 
 El módulo m1_clk_divider genera una señal de reloj más lenta a partir del reloj principal de 27 MHz. Esta señal derivada se utiliza para procesos que no requieren operar a la máxima frecuencia de la FPGA, como el barrido del teclado, la eliminación de rebotes y el refrescamiento del display.
 
@@ -105,7 +105,7 @@ La reducción de frecuencia permite que el sistema interactúe correctamente con
 
 ⸻
 
-###5.2 Subsistema de eliminación de rebote: m2_DeBounce
+### 5.2 Subsistema de eliminación de rebote: m2_DeBounce
 
 El módulo m2_DeBounce se encarga de filtrar las señales provenientes del teclado. Debido a que las teclas son elementos mecánicos, al presionarlas pueden generarse transiciones rápidas no deseadas conocidas como rebotes.
 
@@ -113,7 +113,7 @@ Este módulo permite estabilizar la lectura de cada tecla antes de que el sistem
 
 ⸻
 
-###5.3 Subsistema de lectura del teclado: m3_keypad_reader
+### 5.3 Subsistema de lectura del teclado: m3_keypad_reader
 
 El módulo m3_keypad_reader implementa el barrido del teclado matricial. Su función es activar columnas de forma secuencial y leer las filas para determinar qué tecla fue presionada.
 
@@ -133,7 +133,7 @@ D = 4'hD
 
 ⸻
 
-###5.4 Subsistema de control de display: m4_display_controller
+### 5.4 Subsistema de control de display: m4_display_controller
 
 El módulo m4_display_controller administra el contenido lógico que será mostrado en los displays. Este bloque no enciende directamente los segmentos, sino que mantiene el dato de pantalla en una señal de 16 bits llamada display_data.
 
@@ -149,7 +149,7 @@ Este módulo recibe dígitos desde el teclado y los va acumulando. También pued
 
 ⸻
 
-###5.5 Subsistema de captura numérica: m5_number_capture
+### 5.5 Subsistema de captura numérica: m5_number_capture
 
 El módulo m5_number_capture se utilizó como apoyo para la captura de valores numéricos desde el teclado durante la implementación en FPGA. Su función es estructurar los dígitos ingresados por el usuario y validar que los valores se mantengan dentro del rango permitido.
 
@@ -157,7 +157,7 @@ Este bloque resulta útil para separar la lógica de ingreso de datos de la lóg
 
 ⸻
 
-###5.6 Subsistema de despliegue en 7 segmentos: m6_seven_segment_driver
+### 5.6 Subsistema de despliegue en 7 segmentos: m6_seven_segment_driver
 
 El módulo m6_seven_segment_driver convierte el valor contenido en display_data a las señales físicas necesarias para controlar los displays de 7 segmentos.
 
@@ -170,7 +170,7 @@ Gracias al multiplexado, los cuatro displays se refrescan rápidamente, dando la
 
 ⸻
 
-###5.7 Subsistema de control principal: m7_calculadora
+### 5.7 Subsistema de control principal: m7_calculadora
 
 El módulo m7_calculadora es el controlador principal del sistema. Su función es coordinar el flujo completo de la operación.
 
@@ -190,7 +190,7 @@ El diseño de este módulo se basó en una máquina de estados finitos. Esta FSM
 
 ⸻
 
-###5.8 Subsistema de división entera: m8_divisor
+### 5.8 Subsistema de división entera: m8_divisor
 
 El módulo m8_divisor implementa la operación de división entera sin signo. Recibe un dividendo de 6 bits y un divisor de 4 bits, y entrega un cociente de 6 bits y un residuo de 4 bits.
 
@@ -202,7 +202,7 @@ El módulo incluye una protección contra división entre cero. En caso de recib
 
 ⸻
 
-###5.9 Módulo superior: top_module
+### 5.9 Módulo superior: top_module
 
 El módulo top_module integra todos los subsistemas anteriores. Define las conexiones entre el reloj, el teclado, la lógica de control, la unidad divisora y el sistema de despliegue en 7 segmentos.
 
@@ -210,7 +210,7 @@ Este bloque representa la implementación final cargada en la FPGA.
 
 ⸻
 
-##6. Diagrama general del sistema
+## 6. Diagrama general del sistema
 
 El siguiente diagrama muestra la interconexión general de los módulos principales del sistema.
 
@@ -256,9 +256,9 @@ cols ◀───────│               │                 │          
 
 ⸻
 
-##7. Diagramas de estado de las FSM diseñadas
+## 7. Diagramas de estado de las FSM diseñadas
 
-###7.1 FSM principal de m7_calculadora
+### 7.1 FSM principal de m7_calculadora
 
 La FSM principal controla el flujo de operación del sistema.
 
@@ -304,7 +304,7 @@ La FSM principal controla el flujo de operación del sistema.
                  │     ST_IDLE     │
                  └─────────────────┘
 
-###7.2 FSM de m8_divisor
+### 7.2 FSM de m8_divisor
 
 El divisor utiliza una FSM más simple, con dos estados principales.
 
@@ -329,7 +329,7 @@ El divisor utiliza una FSM más simple, con dos estados principales.
 
 ⸻
 
-##8. Algoritmo de división utilizado
+## 8. Algoritmo de división utilizado
 
 La unidad divisora se implementó mediante el algoritmo de desplazamiento y resta.
 
@@ -354,7 +354,7 @@ ya que:
 
 ⸻
 
-##9. Ejemplo y análisis de simulación funcional
+## 9. Ejemplo y análisis de simulación funcional
 
 Para verificar el diseño se realizaron simulaciones funcionales de los módulos principales y del sistema completo. Se utilizaron testbenches para comprobar la lectura del teclado, el controlador principal, la unidad divisora y la integración del top_module.
 
@@ -375,7 +375,7 @@ Las simulaciones permitieron validar el funcionamiento lógico esperado del sist
 
 ⸻
 
-##10. Resultados obtenidos en FPGA
+## 10. Resultados obtenidos en FPGA
 
 Durante la validación física en la FPGA Tang Nano 9K, el sistema logró ejecutar correctamente múltiples operaciones de división entera sin signo. Se verificó el ingreso de operandos mediante teclado, el almacenamiento de dividendo y divisor, la ejecución de la división y el despliegue del cociente y residuo.
 
@@ -395,7 +395,7 @@ Estas observaciones permitieron identificar oportunidades de mejora en la depura
 
 ⸻
 
-##11. Análisis de consumo de recursos en la FPGA
+## 11. Análisis de consumo de recursos en la FPGA
 
 Una vez finalizada la descripción RTL del sistema, el diseño fue sintetizado e implementado para la FPGA Tang Nano 9K. El objetivo de esta etapa fue estimar la cantidad de recursos físicos utilizados por el circuito, incluyendo LUTs, flip-flops, pines de entrada/salida y recursos de reloj.
 
@@ -410,7 +410,7 @@ La utilización de recursos obtenida muestra que el diseño ocupa una fracción 
 
 ⸻
 
-##12. Reporte de velocidades máximas de reloj
+## 12. Reporte de velocidades máximas de reloj
 
 El diseño fue implementado utilizando el reloj principal de 27 MHz disponible en la Tang Nano 9K. Además, se generó un reloj derivado de menor frecuencia para controlar la lectura del teclado y el refrescamiento del display.
 
@@ -422,11 +422,11 @@ Los resultados de temporización permiten verificar si el diseño cumple con los
 
 ⸻
 
-##13. Análisis de principales problemas hallados y soluciones aplicadas
+## 13. Análisis de principales problemas hallados y soluciones aplicadas
 
 Durante el desarrollo del proyecto se identificaron varios problemas relevantes.
 
-###13.1 Lectura del teclado
+### 13.1 Lectura del teclado
 
 Uno de los primeros retos fue lograr una lectura confiable del teclado matricial. Fue necesario revisar el mapeo de filas y columnas, así como la asignación de las teclas especiales A, B, C, D, * y #.
 
@@ -434,7 +434,7 @@ La solución consistió en definir explícitamente los códigos de cada tecla y 
 
 ⸻
 
-###13.2 Orden de los dígitos en pantalla
+### 13.2 Orden de los dígitos en pantalla
 
 Durante la integración se observó que el orden interno de los nibbles en display_data podía afectar la interpretación de los números. Para evitar errores, el controlador de display fue ajustado para almacenar los dígitos en formato natural:
 
@@ -446,7 +446,7 @@ Esto facilitó que m7_calculadora pudiera convertir correctamente el contenido d
 
 ⸻
 
-###13.3 Sincronización entre m7_calculadora y m8_divisor
+### 13.3 Sincronización entre m7_calculadora y m8_divisor
 
 Inicialmente se enviaban operandos y la señal valid en el mismo ciclo. Esto podía provocar que el divisor iniciara la operación antes de que los operandos estuvieran completamente estables.
 
@@ -459,7 +459,7 @@ Con esto se mejoró la sincronización entre el controlador principal y la unida
 
 ⸻
 
-###13.4 Captura del resultado
+### 13.4 Captura del resultado
 
 También se identificó la necesidad de esperar la señal done proveniente del divisor antes de capturar el cociente y el residuo. Por ello, se incluyó un estado dedicado a la captura del resultado:
 
@@ -469,7 +469,7 @@ Esto permitió almacenar los resultados en last_quotient y last_remainder, y pos
 
 ⸻
 
-###13.5 División entre cero
+### 13.5 División entre cero
 
 Se agregó una verificación para evitar ejecutar divisiones entre cero. Si el divisor almacenado es cero, el sistema no inicia la operación y carga un mensaje de error en pantalla:
 
@@ -479,7 +479,7 @@ Esto evita comportamientos indefinidos y mejora la robustez del sistema.
 
 ⸻
 
-###13.6 Casos límite en FPGA
+### 13.6 Casos límite en FPGA
 
 Durante las pruebas físicas se observaron diferencias entre el comportamiento en simulación y el comportamiento en la FPGA para ciertos casos específicos. Algunos casos límite, como 63 / 15, no presentaron un comportamiento completamente estable en la implementación física.
 
@@ -487,7 +487,7 @@ Estas observaciones sugieren oportunidades de mejora en la validación posterior
 
 ⸻
 
-##14. Fotos y videos del proyecto
+## 14. Fotos y videos del proyecto
 
 En esta sección se incluirán evidencias del funcionamiento físico del sistema en la FPGA.
 
@@ -509,7 +509,7 @@ Capturas de simulación
 
 ⸻
 
-##15. Conclusiones
+## 15. Conclusiones
 
 El proyecto permitió implementar una unidad de división entera sin signo en una FPGA Tang Nano 9K, integrando lectura de teclado, almacenamiento de operandos, control secuencial, división aritmética y despliegue en displays de 7 segmentos.
 
@@ -521,7 +521,7 @@ En general, el proyecto permitió reforzar conceptos clave de diseño lógico di
 
 ⸻
 
-##16. Referencias
+## 16. Referencias
 
 * Material del curso EL-3307 Diseño Lógico I.
 * Pong P. Chu, FPGA Prototyping by SystemVerilog Examples.
