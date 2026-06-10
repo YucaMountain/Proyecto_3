@@ -398,6 +398,12 @@ Estas observaciones permitieron identificar oportunidades de mejora en la depura
 
 Una vez finalizada la descripción RTL del sistema, el diseño fue sintetizado e implementado para la FPGA Tang Nano 9K. El objetivo de esta etapa fue estimar la cantidad de recursos físicos utilizados por el circuito, incluyendo LUTs, flip-flops, pines de entrada/salida y recursos de reloj.
 
+| Recurso Lógico / Físico | Utilizado | Total Disponible | Utilización (%) |
+| :--- | :---: | :---: | :---: |
+| LUTs (*Look-Up Tables*) | 950 | 8,640 | 10.99% |
+| Registros (Flip-Flops) | 174 | 8,640 | 2.01% |
+| Bloques I/O (Pines físicos) | 21 | 274 | 7.66% |
+| Recursos de Reloj (Buffers/Red) | 2 | 16 | 12.5% |
 
 La utilización de recursos obtenida muestra que el diseño ocupa una fracción reducida de la FPGA, debido a que la arquitectura se basa principalmente en lógica combinacional, registros, máquinas de estado, contadores y un divisor secuencial. Los módulos de mayor impacto corresponden al divisor entero, la lógica de control principal, el lector de teclado y el controlador de despliegue en 7 segmentos.
 
