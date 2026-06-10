@@ -490,22 +490,9 @@ Estas observaciones sugieren oportunidades de mejora en la validación posterior
 ## 14. Fotos y videos del proyecto
 
 En esta sección se incluirán evidencias del funcionamiento físico del sistema en la FPGA.
+En el siguiente video podemos ver los casos en donde se sobrepase el límite de bits para el divisor y dividendo, cuando se cruza el limite de 63 y 15 bits respectivamente, aparece un mensaje "EEE" que simula el error de capacidad. Este mensaje de error también se puede ver cuando queremos tratar de dividir algo entre 0. También se puede observar casos de división donde se pueden guardar el divisor y dividendo en los botones B y A respectivamente, y con el D se puede ver el cociente y con el asterisco el residuo. 
 
-Video de funcionamiento
-
-[Colocar enlace al video]
-
-Fotografías del montaje
-
-[Colocar fotografías del montaje]
-
-Fotografías de resultados
-
-[Colocar fotografías de pruebas realizadas]
-
-Capturas de simulación
-
-[Colocar capturas de simulación o terminal]
+https://youtu.be/Di4wjMCVWSk
 
 
 
