@@ -413,9 +413,10 @@ La utilización de recursos obtenida muestra que el diseño ocupa una fracción 
 
 El diseño fue implementado utilizando el reloj principal de 27 MHz disponible en la Tang Nano 9K. Además, se generó un reloj derivado de menor frecuencia para controlar la lectura del teclado y el refrescamiento del display.
 
-Dominio de reloj	Frecuencia objetivo	Frecuencia máxima reportada	Estado
-Reloj principal	27 MHz	[colocar dato]	[PASS/FAIL]
-Reloj derivado	[colocar dato]	[colocar dato]	[PASS/FAIL]
+| Dominio de Reloj | Frecuencia Objetivo | Frecuencia Máxima ($F_{max}$) | Estado |
+| :--- | :---: | :---: | :---: |
+| Reloj Principal (`clk_in`) | 27.00 MHz | 126.28 MHz (Hasta 151.86 MHz en mejor caso) | PASS |
+| Reloj Derivado (`clk_1khz`) | 27.00 MHz* | 44.65 MHz (Hasta 52.37 MHz en mejor caso) | PASS |
 
 Los resultados de temporización permiten verificar si el diseño cumple con los márgenes necesarios para operar de forma estable en la FPGA. Debido a que la mayor parte del sistema opera con una frecuencia reducida, se espera que el diseño presente un margen amplio frente a violaciones de tiempo.
 
