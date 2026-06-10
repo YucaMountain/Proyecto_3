@@ -9,7 +9,7 @@ Curso: EL-3307 Diseño Lógico I
 Fecha de entrega: 9 de junio de 2026
 Plataforma: Tang Nano 9K
 
-⸻
+
 
 ## 1. Introducción
 
@@ -19,7 +19,7 @@ El desarrollo del proyecto permitió integrar conceptos fundamentales de diseño
 
 A diferencia de una implementación directa mediante operadores aritméticos de alto nivel, la unidad divisora se diseñó mediante una arquitectura secuencial basada en desplazamiento y resta. Esto permitió controlar el proceso de división por ciclos de reloj y separar claramente la lógica de control de la lógica aritmética.
 
-⸻
+
 
 ## 2. Definición general del problema, objetivos y especificaciones
 
@@ -46,7 +46,7 @@ Como objetivos específicos se plantearon:
 * Permitir la visualización tanto del cociente como del residuo.
 * Verificar el funcionamiento mediante simulaciones funcionales y pruebas físicas en FPGA.
 
-⸻
+
 
 ## 3. Descripción general del funcionamiento del circuito completo
 
@@ -60,7 +60,7 @@ El módulo m7_calculadora actúa como controlador principal. Este módulo interp
 
 Finalmente, el módulo de display convierte el valor interno a una representación compatible con los cuatro displays de 7 segmentos. El sistema fue probado mediante simulaciones y posteriormente validado en la FPGA.
 
-⸻
+
 
 ## 4. Interfaz de usuario
 
@@ -93,7 +93,7 @@ D   -> muestra cociente
 *   -> muestra residuo
 #   -> muestra cociente
 
-⸻
+
 
 ## 5. Descripción general de cada subsistema
 
@@ -103,7 +103,7 @@ El módulo m1_clk_divider genera una señal de reloj más lenta a partir del rel
 
 La reducción de frecuencia permite que el sistema interactúe correctamente con elementos físicos externos, especialmente el teclado matricial, cuyas señales varían a velocidades mucho menores que el reloj principal.
 
-⸻
+
 
 ### 5.2 Subsistema de eliminación de rebote: m2_DeBounce
 
@@ -111,7 +111,7 @@ El módulo m2_DeBounce se encarga de filtrar las señales provenientes del tecla
 
 Este módulo permite estabilizar la lectura de cada tecla antes de que el sistema la procese. Esto evita que una sola pulsación sea interpretada como múltiples pulsaciones.
 
-⸻
+
 
 ### 5.3 Subsistema de lectura del teclado: m3_keypad_reader
 
@@ -131,7 +131,7 @@ D = 4'hD
 * = 4'hE
 # = 4'hF
 
-⸻
+
 
 ### 5.4 Subsistema de control de display: m4_display_controller
 
@@ -147,7 +147,7 @@ CEEE -> error
 
 Este módulo recibe dígitos desde el teclado y los va acumulando. También puede recibir órdenes desde m7_calculadora para limpiar la pantalla o cargar un resultado.
 
-⸻
+
 
 ### 5.5 Subsistema de captura numérica: m5_number_capture
 
@@ -155,7 +155,7 @@ El módulo m5_number_capture se utilizó como apoyo para la captura de valores n
 
 Este bloque resulta útil para separar la lógica de ingreso de datos de la lógica de control principal, manteniendo el diseño más modular y fácil de verificar.
 
-⸻
+
 
 ### 5.6 Subsistema de despliegue en 7 segmentos: m6_seven_segment_driver
 
@@ -168,7 +168,7 @@ Este módulo realiza dos tareas principales:
 
 Gracias al multiplexado, los cuatro displays se refrescan rápidamente, dando la impresión visual de que todos permanecen encendidos al mismo tiempo.
 
-⸻
+
 
 ### 5.7 Subsistema de control principal: m7_calculadora
 
@@ -188,7 +188,7 @@ Este módulo se encarga de:
 
 El diseño de este módulo se basó en una máquina de estados finitos. Esta FSM permite ordenar el proceso en pasos claros: espera de comandos, preparación de operandos, envío de la señal valid, espera de la señal done y captura del resultado.
 
-⸻
+
 
 ### 5.8 Subsistema de división entera: m8_divisor
 
@@ -200,7 +200,7 @@ Como el dividendo tiene 6 bits, el divisor procesa la operación desde el bit m�
 
 El módulo incluye una protección contra división entre cero. En caso de recibir divisor cero, entrega cociente cero, residuo cero y activa done.
 
-⸻
+
 
 ### 5.9 Módulo superior: top_module
 
@@ -208,7 +208,6 @@ El módulo top_module integra todos los subsistemas anteriores. Define las conex
 
 Este bloque representa la implementación final cargada en la FPGA.
 
-⸻
 
 ## 6. Diagrama general del sistema
 
@@ -254,7 +253,7 @@ cols ◀───────│               │                 │          
           │                                                              │
           └──────────────────────────────────────────────────────────────┘
 
-⸻
+
 
 ## 7. Diagramas de estado de las FSM diseñadas
 
@@ -327,7 +326,7 @@ El divisor utiliza una FSM más simple, con dos estados principales.
           │ done = 1  │
           └───────────┘
 
-⸻
+
 
 ## 8. Algoritmo de división utilizado
 
@@ -352,7 +351,7 @@ ya que:
 5 × 11 = 55
 58 - 55 = 3
 
-⸻
+
 
 ## 9. Ejemplo y análisis de simulación funcional
 
@@ -373,7 +372,7 @@ Operación	Cociente esperado	Residuo esperado	Resultado en simulación
 
 Las simulaciones permitieron validar el funcionamiento lógico esperado del sistema. Además, ayudaron a identificar problemas de sincronización entre el controlador principal y el divisor, especialmente en el uso de las señales valid y done. Para solucionar esto, se separó la colocación de operandos y la activación de valid en estados distintos de la FSM.
 
-⸻
+
 
 ## 10. Resultados obtenidos en FPGA
 
@@ -393,7 +392,7 @@ Caso evaluado	Observación general
 
 Estas observaciones permitieron identificar oportunidades de mejora en la depuración del módulo divisor y en su integración con el sistema de visualización. A pesar de estas limitaciones, la arquitectura general del sistema logró cumplir la funcionalidad principal de captura de operandos, ejecución de división y despliegue de resultados.
 
-⸻
+
 
 ## 11. Análisis de consumo de recursos en la FPGA
 
@@ -408,7 +407,7 @@ Memoria / bloques especiales	[colocar dato]	[colocar dato]	[colocar dato]
 
 La utilización de recursos obtenida muestra que el diseño ocupa una fracción reducida de la FPGA, debido a que la arquitectura se basa principalmente en lógica combinacional, registros, máquinas de estado, contadores y un divisor secuencial. Los módulos de mayor impacto corresponden al divisor entero, la lógica de control principal, el lector de teclado y el controlador de despliegue en 7 segmentos.
 
-⸻
+
 
 ## 12. Reporte de velocidades máximas de reloj
 
@@ -420,7 +419,7 @@ Reloj derivado	[colocar dato]	[colocar dato]	[PASS/FAIL]
 
 Los resultados de temporización permiten verificar si el diseño cumple con los márgenes necesarios para operar de forma estable en la FPGA. Debido a que la mayor parte del sistema opera con una frecuencia reducida, se espera que el diseño presente un margen amplio frente a violaciones de tiempo.
 
-⸻
+
 
 ## 13. Análisis de principales problemas hallados y soluciones aplicadas
 
@@ -432,7 +431,7 @@ Uno de los primeros retos fue lograr una lectura confiable del teclado matricial
 
 La solución consistió en definir explícitamente los códigos de cada tecla y validar su funcionamiento mediante pruebas individuales.
 
-⸻
+
 
 ### 13.2 Orden de los dígitos en pantalla
 
@@ -444,7 +443,7 @@ CC58 -> 58
 
 Esto facilitó que m7_calculadora pudiera convertir correctamente el contenido de pantalla a un valor binario.
 
-⸻
+
 
 ### 13.3 Sincronización entre m7_calculadora y m8_divisor
 
@@ -457,7 +456,7 @@ ST_SEND_VALID -> activa div_valid en el siguiente ciclo
 
 Con esto se mejoró la sincronización entre el controlador principal y la unidad divisora.
 
-⸻
+
 
 ### 13.4 Captura del resultado
 
@@ -467,7 +466,7 @@ ST_CAPTURE_RESULT
 
 Esto permitió almacenar los resultados en last_quotient y last_remainder, y posteriormente mostrarlos mediante las teclas # y *.
 
-⸻
+
 
 ### 13.5 División entre cero
 
@@ -477,7 +476,7 @@ CEEE
 
 Esto evita comportamientos indefinidos y mejora la robustez del sistema.
 
-⸻
+
 
 ### 13.6 Casos límite en FPGA
 
@@ -485,7 +484,7 @@ Durante las pruebas físicas se observaron diferencias entre el comportamiento e
 
 Estas observaciones sugieren oportunidades de mejora en la validación posterior del divisor, la sincronización de señales y el acondicionamiento del flujo de datos entre módulos. Sin embargo, el sistema logró demostrar correctamente la arquitectura general y la funcionalidad principal en múltiples casos de prueba.
 
-⸻
+
 
 ## 14. Fotos y videos del proyecto
 
@@ -507,7 +506,7 @@ Capturas de simulación
 
 [Colocar capturas de simulación o terminal]
 
-⸻
+
 
 ## 15. Conclusiones
 
@@ -519,7 +518,7 @@ Las simulaciones funcionales demostraron el comportamiento esperado en múltiple
 
 En general, el proyecto permitió reforzar conceptos clave de diseño lógico digital, tales como máquinas de estados finitos, sincronización de señales, separación modular, protocolos valid/done, eliminación de rebotes y despliegue multiplexado en 7 segmentos. Además, las limitaciones observadas durante la prueba física representan una base clara para futuras mejoras del diseño.
 
-⸻
+
 
 ## 16. Referencias
 
