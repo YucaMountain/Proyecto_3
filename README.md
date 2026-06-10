@@ -217,21 +217,21 @@ El siguiente diagrama muestra la interconexión general de los módulos principa
           │                         top_module                           │
           │                                                              │
           │  ┌───────────────┐                                           │
-          clk 27MHz ──▶│ m1_clk_divider │                                │
+           clk 27MHz ──▶│ m1_clk_divider                                | 
           │  └───────┬───────┘                                           │
           │          │ clk_1khz                                          │
           │          ▼                                                   │
           │  ┌───────────────┐                                           │
-          rows ───────▶│ m3_keypad_    │── key_code ─────┐              │
+          rows ───────▶│ m3_keypad_    │── key_code ─────┐              |
           │  │ reader        │── key_valid ────┤                         │
-          cols ◀───────│               │                 │               │
+          cols ◀───────│               │                 │              |
           │  └───────────────┘                 │                         │
           │                                    ▼                         │
           │                            ┌───────────────┐                 │
-          │                            │ m4_display_   │◀────────────┐  │
+          │                            │ m4_display_   │◀────────────┐  |
           │                            │ controller    │             │   │
           │                            └───────┬───────┘             │   │
-          │                                    │ display_data        │  │
+          │                                    │ display_data        │   │
           │                                    ▼                     │   │
           │                            ┌───────────────┐             │   │
           │                            │ m6_seven_     │             │   │
